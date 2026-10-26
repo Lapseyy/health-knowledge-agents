@@ -12,15 +12,9 @@ License: the book is CC BY-NC-SA 4.0 (OpenStax, Rice University). Keep use
 non-commercial, attribute OpenStax, and share derived corpus files under the
 same license.
 
-
-Corpus: Anatomy and Physiology 2e, OpenStax, Rice University.
-Licensed under CC BY-NC-SA 4.0: https://creativecommons.org/licenses/by-nc-sa/4.0/
-Source: https://github.com/openstax/osbooks-anatomy-physiology
-The files ap2e_sections.jsonl and ap2e_eval_candidates.jsonl are derived
-from this work and are shared under the same license.
 Usage:
-  git clone --depth 1 https://github.com/openstax/osbooks-anatomy-physiology.git
-  python extract_openstax.py osbooks-anatomy-physiology out/
+  git clone --depth 1 https://github.com/openstax/osbooks-anatomy-physiology.git ../osbooks-anatomy-physiology
+  python scripts/extract_openstax.py ../osbooks-anatomy-physiology data/
 """
 
 import json

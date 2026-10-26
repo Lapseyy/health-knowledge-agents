@@ -1,3 +1,17 @@
-.pdf*
-/.env* 
-/venv*
+# secrets and environments
+.env
+venv/
+.venv/
+__pycache__/
+.pytest_cache/
+
+# generated vector index (rebuild with: python -m src.rag.ingest)
+chroma_index/
+
+# course materials (kept locally, not published)
+docs/docs/
+_course/
+
+# macOS zip junk
+__MACOSX/
+._*
