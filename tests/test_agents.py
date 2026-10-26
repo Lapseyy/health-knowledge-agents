@@ -21,7 +21,7 @@ from src.agents.runtime import Runtime, warm_up
 from src.agents.tools import run_readonly_query
 from src.agents.web import TavilyMCP, parse_results
 from src.config import get_settings
-from src.llm import describe_failure, fallback_table, routing_table
+from src.llm import describe_failure, fallback_table, routing_table, tool_round_options
 from tests.helpers import TAVILY_TEXT, ScriptedModel, fake_web, make_runtime, tool_call
 
 SETTINGS = get_settings()
@@ -146,7 +146,9 @@ def test_supervisor_failure_uses_the_fast_fallback_router(index):
     assert error["agent"] == "supervisor" and error["message"].startswith("rate-limited (429) because Vertex AI")
     assert "Too Many Requests" in error["detail"]  # the raw error stays available in the trace
     plan_event = next(e for e in events if e["type"] == "agent_plan")
-    assert plan_event["planner"] == "nvidia fallback" and plan_event["hedged"] is True
+    assert plan_event["planner"] == "nvidia fallback"
+    assert plan_event["backup"] == "failed" and plan_event["hedged"] is False  # failed over, not hedged
+    assert plan_event["wall_ms"] >= plan_event["ms"]
     supervisor_routes = [e for e in events if e["type"] == "llm_route" and e["agent"] == "supervisor"]
     assert [(e["provider"], e["fallback"]) for e in supervisor_routes] == [("google", False), ("nvidia", True)]
     assert supervisor_routes[1]["trigger"].startswith("Gemini failed: rate-limited (429)")
@@ -169,7 +171,9 @@ def test_slow_supervisor_is_hedged_and_the_faster_plan_wins(index, monkeypatch):
     assert "had not answered after 0.05 s" in backup["trigger"]
     cancelled = next(e for e in events if e["type"] == "llm_cancelled")
     assert cancelled["provider"] == "google" and cancelled["reason"] == "Nemotron answered first"
-    assert next(e for e in events if e["type"] == "agent_plan")["planner"] == "nvidia fallback"
+    plan_event = next(e for e in events if e["type"] == "agent_plan")
+    assert plan_event["planner"] == "nvidia fallback" and plan_event["backup"] == "slow" and plan_event["hedged"]
+    assert plan_event["wall_ms"] >= 50 + plan_event["ms"] - 5  # the wait before the hedge counts toward planning
     assert not any(e["type"] == "error" for e in events)  # slow is not a failure
 
 
@@ -531,6 +535,42 @@ def test_parse_tavily_results_from_text_and_json():
     as_json = '{"results": [{"title": "T", "url": "https://a.b", "content": "C"}]}'
     assert parse_results(as_json) == [{"title": "T", "url": "https://a.b", "content": "C"}]
     assert parse_results("no structure here") == []
+
+
+def test_tool_rounds_cap_nemotron_output_only():
+    routes = routing_table(SETTINGS)
+    assert tool_round_options(routes["research"]) == {"thinking_mode": False, "max_tokens": 600}
+    assert tool_round_options(fallback_table(SETTINGS)["research"]) == {}  # Gemini: reasoning shares the budget
+
+
+def test_model_calls_report_output_size_and_tokens(index):
+    tokens = {"input_tokens": 1200, "output_tokens": 3, "total_tokens": 1203}
+    runtime = make_runtime(
+        index,
+        supervisor=ScriptedModel(plan=RoutePlan(agents=["research"], reason="Anatomy.")),
+        research=ScriptedModel(replies=[AIMessage("DONE", usage_metadata=tokens), AIMessage("Answer [1].")]),
+    )
+    state, events, _ = run_turn(runtime, "What does the heart do?")
+
+    tools_call, answer_call = [e for e in events if e["type"] == "llm_call"]
+    assert tools_call["output_chars"] == 4 and tools_call["input_tokens"] == 1200 and tools_call["output_tokens"] == 3
+    assert answer_call["output_chars"] == len("Answer [1].") and "input_tokens" not in answer_call  # not reported
+    plan = next(e for e in events if e["type"] == "agent_plan")
+    assert plan["input_tokens"] == 900 and plan["output_tokens"] == 60  # survives structured parsing
+
+
+def test_unparseable_gemini_plan_fails_over(index):
+    runtime = make_runtime(
+        index,
+        supervisor=ScriptedModel(plan=None),  # structured output came back empty
+        supervisor_fallback=ScriptedModel(replies=[AIMessage('{"agents": ["research"], "reason": "Anatomy."}')]),
+        research=ScriptedModel(replies=[AIMessage("DONE"), AIMessage("Answer [1].")]),
+    )
+    state, events, _ = run_turn(runtime, "What does the heart do?")
+
+    error = next(e for e in events if e["type"] == "error")
+    assert error["provider"] == "google" and "could not be parsed" in error["message"]
+    assert next(e for e in events if e["type"] == "agent_plan")["planner"] == "nvidia fallback"
 
 
 def test_failures_are_described_briefly():

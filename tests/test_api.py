@@ -69,6 +69,16 @@ def test_session_id_keys_conversation_memory(index):
     assert "How many chambers" not in other_session
 
 
+def test_done_frame_reports_instance_turn_for_cold_start_labeling(index):
+    runtime = research_runtime(index, "First [1].", "Second [1].")
+    with client_for(runtime) as client:
+        first = ask(client, "What does the heart do?", session="a")[-1][1]
+        second = ask(client, "And the lungs?", session="b")[-1][1]
+
+    assert first["instance"]["turn"] == 1 and second["instance"]["turn"] == 2
+    assert 0 <= first["instance"]["uptime_s"] <= second["instance"]["uptime_s"]
+
+
 def test_direct_reply_is_sent_as_one_final_frame(index):
     runtime = make_runtime(index, supervisor=ScriptedModel(
         plan=RoutePlan(agents=[], reason="A greeting.", reply="Hi! Ask me about the body.")))

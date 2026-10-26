@@ -1,0 +1,258 @@
+
+==> Answer the 30 questions (as deployed: Research on Nemotron)    (00:18)
+As deployed: Research on Nemotron 3 Ultra (NVIDIA): 27 questions to answer (3 already in default.jsonl)
+  q04  first words   5.8 s  total  37.2 s  google primary   plan ['research']  sources 5  web 0
+  q05  first words  12.6 s  total  15.1 s  google primary   plan ['research']  sources 9  web 0
+  q06  first words   8.4 s  total  10.9 s  nvidia fallback  plan ['research']  sources 7  web 0
+  q07  first words  11.1 s  total  17.1 s  nvidia fallback  plan ['research']  sources 5  web 0
+  q08  first words   4.8 s  total   9.0 s  google primary   plan ['research']  sources 5  web 0
+  q09  first words  10.4 s  total  12.7 s  google primary   plan ['research']  sources 10  web 0
+  q10  first words  12.2 s  total  13.0 s  nvidia fallback  plan ['research']  sources 7  web 0
+  q11  first words   6.9 s  total  11.0 s  google primary   plan ['research']  sources 7  web 0
+  q12  first words  17.6 s  total  22.8 s  google primary   plan ['research']  sources 14  web 2
+  q13  first words   9.6 s  total  19.9 s  google primary   plan ['research']  sources 7  web 0
+  q14  first words   6.9 s  total   9.2 s  nvidia fallback  plan ['research']  sources 5  web 0
+  q15  first words   5.0 s  total   7.0 s  google primary   plan ['research']  sources 5  web 0
+  q16  first words   4.9 s  total   9.6 s  google primary   plan ['research']  sources 9  web 0
+  q17  first words   5.6 s  total  13.2 s  google primary   plan ['research']  sources 9  web 0
+  q18  first words  26.5 s  total  31.9 s  google primary   plan ['research']  sources 9  web 2
+  q19  first words  13.1 s  total  14.9 s  google primary   plan ['research']  sources 11  web 2
+  q20  first words  10.3 s  total  13.2 s  google primary   plan ['research']  sources 9  web 0
+  q21  first words  11.6 s  total  19.2 s  google primary   plan ['research']  sources 5  web 0
+  q22  first words   8.1 s  total  10.4 s  google primary   plan ['research']  sources 8  web 0
+  q23  first words  42.1 s  total  46.5 s  google primary   plan ['research']  sources 13  web 2
+  q24  first words  19.0 s  total  21.9 s  google primary   plan ['research']  sources 12  web 1
+  q25  first words  17.1 s  total  19.7 s  google primary   plan ['research']  sources 12  web 2
+  q26  first words   8.3 s  total  10.0 s  nvidia fallback  plan ['research']  sources 5  web 0
+  q27  first words   8.7 s  total  11.7 s  nvidia fallback  plan ['research']  sources 7  web 0
+  q28  first words  25.0 s  total  62.6 s  google primary   plan ['research']  sources 14  web 2
+  q29  first words  14.2 s  total  18.6 s  nvidia fallback  plan ['research']  sources 9  web 2
+  q30  first words  13.2 s  total  14.7 s  nvidia fallback  plan ['research']  sources 5  web 0
+
+==> Answer them again with Research on Gemini    (00:28)
+Provider comparison: Research on Gemini 3.8 Flash (Google): 30 questions to answer (0 already in research-gemini.jsonl)
+  q01  first words   6.6 s  total   8.9 s  google primary   plan ['research']  sources 5  web 0
+  q02  first words   9.2 s  total  12.6 s  nvidia fallback  plan ['research']  sources 9  web 0
+  q03  first words   5.3 s  total   8.3 s  google primary   plan ['research']  sources 5  web 0
+  q04  first words  10.8 s  total  19.2 s  google primary   plan ['research']  sources 5  web 0  ERRORS
+  q05  first words   7.8 s  total   9.9 s  google primary   plan ['research']  sources 5  web 0
+  q06  first words  96.4 s  total  99.7 s  google primary   plan ['research']  sources 7  web 1  ERRORS
+  q07  first words  45.3 s  total  47.9 s  nvidia fallback  plan ['research']  sources 5  web 0
+  q08  first words  51.6 s  total  51.7 s  nvidia fallback  plan ['research']  sources 5  web 0
+  q09  first words   7.1 s  total   8.9 s  nvidia fallback  plan ['research']  sources 5  web 0
+  q10  first words   7.4 s  total  10.9 s  nvidia fallback  plan ['research']  sources 5  web 0
+  q11  first words   7.7 s  total  10.7 s  nvidia fallback  plan ['research']  sources 5  web 0
+  q12  first words  10.1 s  total  12.5 s  nvidia fallback  plan ['research']  sources 10  web 0
+  q13  first words   7.1 s  total   9.6 s  google primary   plan ['research']  sources 5  web 0
+  q14  first words  16.3 s  total  18.6 s  google primary   plan ['research']  sources 5  web 0  ERRORS
+  q15  first words  30.0 s  total  31.8 s  nvidia fallback  plan ['research']  sources 5  web 0
+  q16  first words   6.9 s  total   9.9 s  google primary   plan ['research']  sources 10  web 0
+  q17  first words   6.7 s  total   8.3 s  google primary   plan ['research']  sources 8  web 0
+  q18  first words   8.3 s  total  10.8 s  google primary   plan ['research']  sources 5  web 0
+  q19  first words  13.0 s  total  16.1 s  nvidia fallback  plan ['research']  sources 12  web 1
+  q20  first words  48.9 s  total  51.4 s  google primary   plan ['research']  sources 8  web 0
+  q21  first words   5.4 s  total   7.7 s  google primary   plan ['research']  sources 5  web 0
+  q22  first words   6.3 s  total   8.9 s  google primary   plan ['research']  sources 7  web 0
+  q23  first words   9.4 s  total  10.3 s  google primary   plan ['research']  sources 8  web 1
+  q24  first words   4.8 s  total   7.5 s  google primary   plan ['research']  sources 5  web 0
+  q25  first words  21.4 s  total  34.1 s  google primary   plan ['research']  sources 5  web 0
+  q26  first words  10.2 s  total  10.6 s  nvidia fallback  plan ['research']  sources 5  web 0
+  q27  first words   4.5 s  total   6.7 s  google primary   plan ['research']  sources 5  web 0
+  q28  first words   8.1 s  total  10.5 s  google primary   plan ['research']  sources 8  web 0
+  q29  first words  11.3 s  total  11.4 s  google primary   plan ['research']  sources 6  web 0
+  q30  first words   9.5 s  total  11.5 s  nvidia fallback  plan ['research']  sources 5  web 0
+
+==> Score the deployed configuration with RAGAS    (00:38)
+Scoring 27 answers from default.jsonl (3 already scored)
+  q06  faithfulness 0.36  answer_relevancy 0.97  context_precision 0.70  context_recall 1.00
+  q05  faithfulness 0.78  answer_relevancy 0.91  context_precision 0.67  context_recall 1.00
+  q04  faithfulness 0.62  answer_relevancy 0.92  context_precision 1.00  context_recall 0.00
+  q08  faithfulness 1.00  answer_relevancy 0.80  context_precision 1.00  context_recall 1.00
+  q09  faithfulness 0.89  answer_relevancy 0.87  context_precision 1.00  context_recall 0.50
+  q11  faithfulness 0.91  answer_relevancy 0.92  context_precision 1.00  context_recall 1.00
+  q10  faithfulness 1.00  answer_relevancy 0.85  context_precision 0.92  context_recall 1.00
+  q13  faithfulness 0.79  answer_relevancy 0.79  context_precision 0.83  context_recall 1.00
+  q12  faithfulness 0.97  answer_relevancy 0.85  context_precision 0.54  context_recall 1.00
+  q14  faithfulness 0.64  answer_relevancy 0.85  context_precision 1.00  context_recall 1.00
+  q15  faithfulness 1.00  answer_relevancy 0.87  context_precision 1.00  context_recall 1.00
+  q16  faithfulness 0.68  answer_relevancy 0.89  context_precision 0.88  context_recall 1.00
+  q17  faithfulness 0.94  answer_relevancy 0.86  context_precision 0.14  context_recall 1.00
+  q18  faithfulness 0.92  answer_relevancy 0.76  context_precision 0.81  context_recall 1.00
+  q19  faithfulness 0.75  answer_relevancy 0.95  context_precision 0.50  context_recall 1.00
+  q21  faithfulness 0.89  answer_relevancy 0.86  context_precision 1.00  context_recall 1.00
+  q20  faithfulness 1.00  answer_relevancy 0.84  context_precision 0.37  context_recall 0.60
+  q23  faithfulness 0.65  answer_relevancy 0.95  context_precision 0.26  context_recall 1.00
+  q24  faithfulness 0.41  answer_relevancy 0.97  context_precision 0.50  context_recall 0.50
+  q07  faithfulness -  answer_relevancy 0.90  context_precision 1.00  context_recall 1.00  ERRORS
+  q25  faithfulness 0.85  answer_relevancy 0.95  context_precision 0.46  context_recall 0.50
+  q27  faithfulness 0.82  answer_relevancy 0.92  context_precision 0.82  context_recall 1.00
+  q28  faithfulness 0.87  answer_relevancy 0.87  context_precision 0.75  context_recall 1.00
+  q26  faithfulness 0.32  answer_relevancy 0.92  context_precision 1.00  context_recall 0.33
+  q30  faithfulness 1.00  answer_relevancy 0.95  context_precision 1.00  context_recall 1.00
+  q29  faithfulness 0.65  answer_relevancy 0.91  context_precision 0.77  context_recall 1.00
+  q22  faithfulness 0.88  answer_relevancy 0.95  context_precision 0.29  context_recall -  ERRORS
+
+==> Score the Research-on-Gemini configuration with RAGAS    (00:52)
+Scoring 30 answers from research-gemini.jsonl (0 already scored)
+  q02  faithfulness 1.00  answer_relevancy 0.75  context_precision 0.42  context_recall 1.00
+  q04  faithfulness 1.00  answer_relevancy 0.91  context_precision 1.00  context_recall 1.00
+  q01  faithfulness 0.86  answer_relevancy 0.88  context_precision 0.58  context_recall 1.00
+  q05  faithfulness 0.91  answer_relevancy 0.91  context_precision 1.00  context_recall 1.00
+  q03  faithfulness 0.93  answer_relevancy 0.85  context_precision 0.70  context_recall 1.00
+  q07  faithfulness 1.00  answer_relevancy 0.90  context_precision 1.00  context_recall 1.00
+  q08  faithfulness 1.00  answer_relevancy 0.80  context_precision 1.00  context_recall 1.00
+  q10  faithfulness 0.93  answer_relevancy 0.93  context_precision 1.00  context_recall 1.00
+  q09  faithfulness 0.86  answer_relevancy 0.81  context_precision 1.00  context_recall 0.00
+  q06  faithfulness 0.57  answer_relevancy 0.97  context_precision 0.76  context_recall 1.00
+  q11  faithfulness 1.00  answer_relevancy 0.98  context_precision 1.00  context_recall 1.00
+  q13  faithfulness 1.00  answer_relevancy 0.98  context_precision 0.92  context_recall 1.00
+  q14  faithfulness 0.54  answer_relevancy 0.90  context_precision 1.00  context_recall 1.00
+  q15  faithfulness 1.00  answer_relevancy 0.97  context_precision 1.00  context_recall 1.00
+  q17  faithfulness 1.00  answer_relevancy 0.83  context_precision 0.14  context_recall 1.00
+  q12  faithfulness 1.00  answer_relevancy 0.86  context_precision 0.51  context_recall 0.75
+  q16  faithfulness 1.00  answer_relevancy 0.78  context_precision 0.88  context_recall 1.00
+  q18  faithfulness 1.00  answer_relevancy 0.80  context_precision 1.00  context_recall 1.00
+  q20  faithfulness 0.86  answer_relevancy 0.77  context_precision 0.34  context_recall 0.60
+  q19  faithfulness 1.00  answer_relevancy 1.00  context_precision 0.49  context_recall 1.00
+  q22  faithfulness 0.94  answer_relevancy 0.97  context_precision 0.29  context_recall 1.00
+  q24  faithfulness 0.94  answer_relevancy 0.92  context_precision 0.50  context_recall 0.00
+  q23  faithfulness 1.00  answer_relevancy 0.95  context_precision 0.28  context_recall 1.00
+  q25  faithfulness 0.64  answer_relevancy 0.97  context_precision 1.00  context_recall 0.50
+  q21  faithfulness 1.00  answer_relevancy 0.90  context_precision 1.00  context_recall 1.00
+  q26  faithfulness 0.86  answer_relevancy 0.92  context_precision 1.00  context_recall 0.33
+  q27  faithfulness 1.00  answer_relevancy 0.84  context_precision 0.87  context_recall 1.00
+  q29  faithfulness 0.90  answer_relevancy 0.91  context_precision 0.81  context_recall 1.00
+  q30  faithfulness 1.00  answer_relevancy 0.90  context_precision 1.00  context_recall 1.00
+  q28  faithfulness 1.00  answer_relevancy 0.83  context_precision 0.89  context_recall 1.00
+
+==> Compare the two routers    (00:57)
+Routing 26 messages with 2 routers
+  r01  gemini              ok    3033 ms  ['research']  (expected ['research'])
+  r01  nemotron-lightning  ok    1355 ms  ['research']  (expected ['research'])
+  r02  gemini              ok    2224 ms  ['research']  (expected ['research'])
+  r02  nemotron-lightning  ok    1114 ms  ['research']  (expected ['research'])
+  r03  gemini              ok    7030 ms  ['research']  (expected ['research'])
+  r03  nemotron-lightning  ok     977 ms  ['research']  (expected ['research'])
+  r04  gemini              ok    2987 ms  ['research']  (expected ['research'])
+  r04  nemotron-lightning  ok    1099 ms  ['research']  (expected ['research'])
+  r05  gemini              ok    2857 ms  ['research']  (expected ['research'])
+  r05  nemotron-lightning  ok    1111 ms  ['research']  (expected ['research'])
+  r06  gemini              ok    1897 ms  ['research']  (expected ['research'])
+  r06  nemotron-lightning  ok     623 ms  ['research']  (expected ['research'])
+  r07  gemini              ok    1916 ms  ['research']  (expected ['research'])
+  r07  nemotron-lightning  ok     908 ms  ['research']  (expected ['research'])
+  r08  gemini              ok    2658 ms  ['research']  (expected ['research'])
+  r08  nemotron-lightning  ok    1619 ms  ['research']  (expected ['research'])
+  r09  gemini              ok    1715 ms  ['summary']  (expected ['summary'])
+  r09  nemotron-lightning  ok     794 ms  ['summary']  (expected ['summary'])
+  r10  gemini              ok    8635 ms  ['summary']  (expected ['summary'])
+  r10  nemotron-lightning  ok     604 ms  ['summary']  (expected ['summary'])
+  r11  gemini              ok    4903 ms  ['summary']  (expected ['summary'])
+  r11  nemotron-lightning  ok    1087 ms  ['summary']  (expected ['summary'])
+  r12  gemini              ok    3249 ms  ['summary']  (expected ['summary'])
+  r12  nemotron-lightning  ok     952 ms  ['summary']  (expected ['summary'])
+  r13  gemini              ok    1172 ms  ['data']  (expected ['data'])
+  r13  nemotron-lightning  ok     738 ms  ['data']  (expected ['data'])
+  r14  gemini              ok    1540 ms  ['data']  (expected ['data'])
+  r14  nemotron-lightning  ok     859 ms  ['data']  (expected ['data'])
+  r15  gemini              ok    1714 ms  ['data']  (expected ['data'])
+  r15  nemotron-lightning  ok     854 ms  ['data']  (expected ['data'])
+  r16  gemini              ok    4628 ms  ['data']  (expected ['data'])
+  r16  nemotron-lightning  ok    7926 ms  ['data']  (expected ['data'])
+  r17  gemini              ok    2492 ms  ['research', 'data']  (expected ['research', 'data'])
+  r17  nemotron-lightning  ok    1009 ms  ['research', 'data']  (expected ['research', 'data'])
+  r18  gemini              ok   10064 ms  ['research', 'data']  (expected ['research', 'data'])
+  r18  nemotron-lightning  ok    1374 ms  ['research', 'data']  (expected ['research', 'data'])
+  r19  gemini              ok    2290 ms  []  (expected [])
+  r19  nemotron-lightning  ok     860 ms  []  (expected [])
+  r20  gemini              ok    1484 ms  []  (expected [])
+  r20  nemotron-lightning  ok     767 ms  []  (expected [])
+  r21  gemini              ok    1521 ms  []  (expected [])
+  r21  nemotron-lightning  ok    1692 ms  []  (expected [])
+  r22  gemini              ok    4615 ms  []  (expected [])
+  r22  nemotron-lightning  ok    1532 ms  []  (expected [])
+  r23  gemini              ok   12943 ms  ['research']  (expected ['research'])
+  r23  nemotron-lightning  ok   14126 ms  ['research']  (expected ['research'])
+  r24  gemini              ok    3269 ms  ['research']  (expected ['research'])
+  r24  nemotron-lightning  ok     886 ms  ['research']  (expected ['research'])
+  r25  gemini              ok    2015 ms  ['data']  (expected ['data'])
+  r25  nemotron-lightning  ok     844 ms  ['data']  (expected ['data'])
+  r26  gemini              ok   17241 ms  ['summary']  (expected ['summary'])
+  r26  nemotron-lightning  ok     868 ms  ['summary']  (expected ['summary'])
+
+==> Measure the live site, warm    (01:01)
+Priming request (saved; labeled cold if it started an instance)
+  COLD  textbook  first words  30.4 s  total  32.1 s  google primary   plan ['research']  (instance turn 1, up 0.1 s)
+Warm run 1/2
+  warm  textbook  first words   6.5 s  total   7.5 s  nvidia fallback  plan ['research']  (instance turn 2, up 14.1 s)
+  warm  textbook  first words   8.0 s  total  10.3 s  nvidia fallback  plan ['research']  (instance turn 3, up 24.6 s)
+  warm  web       first words  16.4 s  total  21.9 s  nvidia fallback  plan ['research']  (instance turn 4, up 37.9 s)
+  warm  web       first words  30.0 s  total  31.1 s  nvidia fallback  plan ['research']  (instance turn 5, up 62.8 s)
+  warm  data      first words   6.9 s  total   7.5 s  google primary   plan ['data']  (instance turn 6, up 96.9 s)
+  warm  summary   first words   6.8 s  total  21.2 s  nvidia fallback  plan ['summary']  (instance turn 7, up 107.4 s)
+  warm  chapter   first words  23.0 s  total  28.5 s  google primary   plan ['summary']  (instance turn 8, up 131.6 s)
+Warm run 2/2
+  warm  textbook  first words  12.0 s  total  18.8 s  nvidia fallback  plan ['research']  (instance turn 9, up 163.1 s)
+  warm  textbook  first words   5.5 s  total   9.9 s  nvidia fallback  plan ['research']  (instance turn 10, up 184.9 s)
+  warm  web       first words  19.6 s  total  24.7 s  nvidia fallback  plan ['research']  (instance turn 11, up 197.9 s)
+  warm  web       first words   5.7 s  total   8.9 s  nvidia fallback  plan ['research']  (instance turn 12, up 225.6 s)
+  warm  data      first words   9.5 s  total  14.7 s  google primary   plan ['data']  (instance turn 13, up 237.5 s)
+  warm  summary   first words   5.6 s  total  15.6 s  nvidia fallback  plan ['summary']  (instance turn 14, up 255.2 s)
+  warm  chapter   first words  33.3 s  total  45.9 s  nvidia fallback  plan ['summary']  (instance turn 15, up 273.8 s)
+
+==> Measure 3 cold starts (20 min idle before each)    (01:06)
+Cold sample 1/3: waiting 20 min for the service to scale to zero (started 01:06)
+  COLD  textbook  first words  33.3 s  total  34.7 s  nvidia fallback  plan ['research']  (instance turn 1, up 0.1 s)
+Cold sample 2/3: waiting 20 min for the service to scale to zero (started 01:27)
+  COLD  textbook  first words  35.1 s  total  36.2 s  nvidia fallback  plan ['research']  (instance turn 1, up 0.1 s)
+Cold sample 3/3: waiting 20 min for the service to scale to zero (started 01:47)
+  COLD  textbook  first words  55.9 s  total  79.0 s  google primary   plan ['research']  (instance turn 1, up 0.1 s)
+
+==> Write the report    (02:09)
+# Evaluation results (prices as of 2026-10-25)
+
+## RAGAS (mean ± sd; n = questions scored)
+
+| Configuration | faithfulness | answer_relevancy | context_precision | context_recall | Judge calls | Judge cost |
+|---|---|---|---|---|---|---|
+| As deployed: Research on Nemotron 3 Ultra (NVIDIA) | 0.80 ± 0.19 (n=29) | 0.89 ± 0.05 (n=30) | 0.73 ± 0.27 (n=30) | 0.88 ± 0.26 (n=29) | 1270 | $2.407 |
+
+2 answers had a metric error in default: q07 {'faithfulness': "GoogleRateLimitError: Error calling model 'gemini-3.8-flash' (RESOURCE_EXHAUSTED): 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'Resource exhausted. Please try again later. Please refer to https://cloud.google.com/vertex-ai/generative-ai/docs/error-code-429 for more details.', 'status'"}; q22 {'context_recall': "GoogleRateLimitError: Error calling model 'gemini-3.8-flash' (RESOURCE_EXHAUSTED): 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'Resource exhausted. Please try again later. Please refer to https://cloud.google.com/vertex-ai/generative-ai/docs/error-code-429 for more details.', 'status'"}
+| Provider comparison: Research on Gemini 3.8 Flash (Google) | 0.92 ± 0.13 (n=30) | 0.89 ± 0.07 (n=30) | 0.78 ± 0.28 (n=30) | 0.87 ± 0.29 (n=30) | 1090 | $2.029 |
+
+## Local runs: latency in seconds (median / p90) and usage per query
+
+| Configuration | n | First words | Total | Routing | Retrieval | Web search | Model calls (sum) | Model calls | Web searches | Gemini planned | Cost / query |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| As deployed: Research on Nemotron 3 Ultra (NVIDIA) | 30 | 10.7 / 25.0 | 14.8 / 31.9 | 2.6 / 4.2 | 0.0 / 0.0 | 0.0 / 4.8 | 9.2 / 25.6 | 3.6 | 0.57 | 73% | $0.00557 |
+
+default: model time by stage (median s per query): answer 4.9, tools 4.7
+default: gemini-3.8-flash: 1.0 calls, 621 input and 54 output tokens per query
+default: nvidia/nemotron-3-ultra-550b-a55b: 3.6 calls, 9,750 input and 351 output tokens per query
+default: nvidia/nemotron-3.5-lightning-30b-a3b: 1.0 calls, 389 input and 70 output tokens per query
+default: cost per query: models $0.00049, web $0.00453, Cloud Run $0.00055
+
+| Provider comparison: Research on Gemini 3.8 Flash (Google) | 30 | 8.7 / 45.3 | 10.8 / 47.9 | 2.5 / 3.7 | 0.0 / 0.0 | 0.0 / 0.0 | 6.8 / 30.9 | 2.5 | 0.10 | 63% | $0.00609 |
+
+research-gemini: model time by stage (median s per query): answer 4.0, tools 2.5
+research-gemini: gemini-3.8-flash: 2.9 calls, 4,594 input and 343 output tokens per query
+research-gemini: nvidia/nemotron-3-ultra-550b-a55b: 2.3 calls, 4,615 input and 232 output tokens per query
+research-gemini: nvidia/nemotron-3.5-lightning-30b-a3b: 1.0 calls, 387 input and 76 output tokens per query
+research-gemini: cost per query: models $0.00473, web $0.00080, Cloud Run $0.00056
+
+## Router comparison
+
+| Router | Model | n | Correct agents | Exact order | Errors | Latency median / p90 (s) | Tokens per call (in / out) |
+|---|---|---|---|---|---|---|---|
+| gemini | gemini-3.8-flash | 26 | 26/26 | 26/26 | 0 | 2.8 / 10.1 | 617 / 55 |
+| nemotron-lightning | nvidia/nemotron-3.5-lightning-30b-a3b | 26 | 26/26 | 26/26 | 0 | 1.0 / 1.7 | 386 / 56 |
+
+## Deployed service (client-side seconds, median / p90; n)
+
+| Category | Warm first words | Warm total | Cold first words | Cold total |
+|---|---|---|---|---|
+| chapter | 28.2 / 33.3 (n=2) | 37.2 / 45.9 (n=2) | n/a | n/a |
+| data | 8.2 / 9.5 (n=2) | 11.1 / 14.7 (n=2) | n/a | n/a |
+| summary | 6.2 / 6.8 (n=2) | 18.4 / 21.2 (n=2) | n/a | n/a |
+| textbook | 7.2 / 12.0 (n=4) | 10.1 / 18.8 (n=4) | 34.2 / 55.9 (n=4) | 35.5 / 79.0 (n=4) |
+| web | 18.0 / 30.0 (n=4) | 23.3 / 31.1 (n=4) | n/a | n/a |

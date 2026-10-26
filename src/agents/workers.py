@@ -20,7 +20,7 @@ from src.agents import prompts
 from src.agents.events import emit, timer
 from src.agents.sources import SourceRegistry
 from src.agents.tools import data_tools, research_tools, summary_tools, textbook_search
-from src.llm import call_options
+from src.llm import call_options, tool_round_options, usage
 
 if TYPE_CHECKING:
     from src.agents.runtime import Runtime
@@ -99,13 +99,14 @@ async def run_worker(spec: WorkerSpec, state: dict, runtime: "Runtime", route: "
         messages: list[BaseMessage] = [
             SystemMessage(spec.tool_prompt.format(schema=runtime.db_schema)), *history, HumanMessage(loop_input),
         ]
-        bound = llm.bind_tools(tools, **options).with_config(tags=["tool_loop"], run_name=f"{spec.name}_tools")
+        bound = llm.bind_tools(tools, **tool_round_options(route)).with_config(
+            tags=["tool_loop"], run_name=f"{spec.name}_tools")
         by_name = {tool.name: tool for tool in tools}
         for _ in range(MAX_TOOL_ROUNDS):
             with timer() as call_time:
                 reply = await bound.ainvoke(messages)
             emit({"type": "llm_call", "agent": spec.name, "provider": route.provider, "model": route.model,
-                  "stage": "tools", "tool_calls": len(reply.tool_calls), "ms": call_time["ms"]})
+                  "stage": "tools", "tool_calls": len(reply.tool_calls), "ms": call_time["ms"], **usage(reply)})
             messages.append(reply)
             if not reply.tool_calls:
                 break
@@ -128,7 +129,7 @@ async def run_worker(spec: WorkerSpec, state: dict, runtime: "Runtime", route: "
             HumanMessage(f"{task}\n\nSources:\n{registry.render()}"),
         ])
     emit({"type": "llm_call", "agent": spec.name, "provider": route.provider, "model": route.model,
-          "stage": tag, "ms": answer_time["ms"]})
+          "stage": tag, "ms": answer_time["ms"], **usage(response)})
     answer = response.text.strip()
 
     result = {

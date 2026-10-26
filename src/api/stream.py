@@ -8,7 +8,11 @@ Frames (each is `event: <name>` plus one JSON `data:` line):
                                 the streamed tokens (direct replies, failover, errors)
     citation  {"n", "kind", "key", "title", "url", "snippet"}
     error     {"message"}       the request itself failed
-    done      {"ttft_ms", "total_ms", "plan", "agents"}
+    done      {"ttft_ms", "total_ms", "plan", "agents", "instance"}
+
+instance is {"turn", "uptime_s"}: which request this server process is serving
+and how long it has been up, so a latency probe can tell a cold start (turn 1,
+seconds of uptime) from a warm one.
 
 t_ms on trace frames is milliseconds since the request started, measured on
 the server, so the UI's timeline is not skewed by network buffering.
@@ -28,7 +32,7 @@ def sse(event: str, data: dict) -> str:
     return f"event: {event}\ndata: {json.dumps(data, default=str)}\n\n"
 
 
-async def stream_turn(graph, query: str, session_id: str) -> AsyncIterator[str]:
+async def stream_turn(graph, query: str, session_id: str, instance: dict | None = None) -> AsyncIterator[str]:
     started = time.perf_counter()
 
     def elapsed() -> int:
@@ -61,8 +65,9 @@ async def stream_turn(graph, query: str, session_id: str) -> AsyncIterator[str]:
         agents = [{k: r.get(k) for k in ("agent", "provider", "model", "tools", "ms", "error")}
                   for r in state.get("completed", [])]
         yield sse("done", {"ttft_ms": first_token_ms, "total_ms": elapsed(), "plan": state.get("plan"),
-                           "agents": agents})
+                           "agents": agents, "instance": instance})
     except Exception as error:  # never leave the client hanging on a half-open stream
         log.exception("Turn failed for session %s", session_id)
         yield sse("error", {"message": f"The request failed: {type(error).__name__}. Try again."})
-        yield sse("done", {"ttft_ms": first_token_ms, "total_ms": elapsed(), "plan": None, "agents": []})
+        yield sse("done", {"ttft_ms": first_token_ms, "total_ms": elapsed(), "plan": None, "agents": [],
+                           "instance": instance})

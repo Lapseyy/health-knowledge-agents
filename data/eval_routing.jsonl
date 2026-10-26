@@ -1,0 +1,26 @@
+{"id": "r01", "history": [], "message": "What does the left ventricle do?", "expected": ["research"]}
+{"id": "r02", "history": [], "message": "How do neurons transmit a signal across a synapse?", "expected": ["research"]}
+{"id": "r03", "history": [], "message": "What is the function of the loop of Henle?", "expected": ["research"]}
+{"id": "r04", "history": [], "message": "How does the diaphragm help us breathe?", "expected": ["research"]}
+{"id": "r05", "history": [], "message": "What are the latest guidelines for treating high blood pressure?", "expected": ["research"]}
+{"id": "r06", "history": [], "message": "Has the FDA approved any new Alzheimer's drugs recently?", "expected": ["research"]}
+{"id": "r07", "history": [], "message": "What is the current CDC recommendation for the flu vaccine?", "expected": ["research"]}
+{"id": "r08", "history": [], "message": "What have recent studies found about GLP-1 drugs and heart disease?", "expected": ["research"]}
+{"id": "r09", "history": [], "message": "Summarize chapter 2.", "expected": ["summary"]}
+{"id": "r10", "history": [], "message": "Summarize the textbook section on the cardiac cycle.", "expected": ["summary"]}
+{"id": "r11", "history": [], "message": "Give me an overview of chapter 19 of the textbook.", "expected": ["summary"]}
+{"id": "r12", "history": [], "message": "Summarize this article: https://www.cdc.gov/flu/about/index.html", "expected": ["summary"]}
+{"id": "r13", "history": [], "message": "How many patients have diabetes?", "expected": ["data"]}
+{"id": "r14", "history": [], "message": "What is the average BMI of living patients?", "expected": ["data"]}
+{"id": "r15", "history": [], "message": "Which three conditions are most common in the patient database?", "expected": ["data"]}
+{"id": "r16", "history": [], "message": "What percentage of patients are over 65?", "expected": ["data"]}
+{"id": "r17", "history": [], "message": "What is hypertension, and how many patients in the database have it?", "expected": ["research", "data"]}
+{"id": "r18", "history": [], "message": "Explain how insulin works, and give the average HbA1c of diabetic patients.", "expected": ["research", "data"]}
+{"id": "r19", "history": [], "message": "Hi!", "expected": []}
+{"id": "r20", "history": [], "message": "Thanks, that was helpful.", "expected": []}
+{"id": "r21", "history": [], "message": "What can you do?", "expected": []}
+{"id": "r22", "history": [], "message": "What do you think about the Epstein files?", "expected": []}
+{"id": "r23", "history": [{"role": "user", "text": "What are the latest guidelines for treating high blood pressure?"}, {"role": "assistant", "text": "The 2025 ACC/AHA guideline sets a treatment target below 130/80 mm Hg for most adults and recommends starting medication at stage 2 hypertension."}], "message": "What does the left ventricle do?", "expected": ["research"]}
+{"id": "r24", "history": [{"role": "user", "text": "What does the left ventricle do?"}, {"role": "assistant", "text": "The left ventricle pumps oxygen-rich blood into the aorta for the systemic circuit."}], "message": "And the right one?", "expected": ["research"]}
+{"id": "r25", "history": [{"role": "user", "text": "How many patients have diabetes?"}, {"role": "assistant", "text": "In this synthetic population, 92 patients have a recorded diagnosis of diabetes."}], "message": "What is their average BMI?", "expected": ["data"]}
+{"id": "r26", "history": [{"role": "user", "text": "Summarize the textbook section on the cardiac cycle."}, {"role": "assistant", "text": "The cardiac cycle is the sequence of atrial and ventricular systole and diastole."}], "message": "Now summarize chapter 20.", "expected": ["summary"]}

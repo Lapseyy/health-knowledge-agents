@@ -1,0 +1,6 @@
+# Evaluation only (scripts/evaluate.py, scripts/measure_latency.py); not installed in the image.
+-r requirements-dev.txt
+ragas==0.4.3
+# ragas 0.4.3 imports ChatVertexAI from langchain_community.chat_models.vertexai, which
+# langchain-community 0.4.2 removed; 0.4.1 still has it and supports langchain-core 1.x.
+langchain-community==0.4.1

@@ -79,12 +79,13 @@ def fallback_table(settings: Settings) -> dict[str, Route]:
     }
 
 
-def chat_model(route: Route, settings: Settings) -> BaseChatModel:
+def chat_model(route: Route, settings: Settings, **overrides) -> BaseChatModel:
+    """The client for a route. `overrides` replace defaults (the evaluation judge uses temperature 0)."""
     if route.provider == "nvidia":
         from langchain_nvidia_ai_endpoints import ChatNVIDIA
 
         # Nemotron's reasoning mode is turned off per call (see call_options).
-        return ChatNVIDIA(model=route.model, temperature=0.2, max_completion_tokens=2500)
+        return ChatNVIDIA(**{"model": route.model, "temperature": 0.2, "max_completion_tokens": 2500, **overrides})
 
     if route.provider == "google":
         from langchain_google_genai import ChatGoogleGenerativeAI
@@ -93,17 +94,18 @@ def chat_model(route: Route, settings: Settings) -> BaseChatModel:
         # with GOOGLE_GENAI_USE_VERTEXAI=false the client uses GOOGLE_API_KEY.
         vertex = {"vertexai": True, "project": settings.google_cloud_project,
                   "location": settings.google_cloud_location} if settings.gemini_use_vertex else {}
-        return ChatGoogleGenerativeAI(
-            model=route.model,
-            temperature=0.2,
-            max_output_tokens=4096,  # includes Gemini's reasoning tokens
-            reasoning_effort=settings.gemini_reasoning_effort,
+        return ChatGoogleGenerativeAI(**{
+            "model": route.model,
+            "temperature": 0.2,
+            "max_output_tokens": 4096,  # includes Gemini's reasoning tokens
+            "reasoning_effort": settings.gemini_reasoning_effort,
             # The router has a fast backup on the other provider, so a 429 should fail over at
             # once rather than spend seconds backing off; agents keep one in-client retry.
-            max_retries=0 if route.agent == "supervisor" else 1,
-            timeout=120,  # also sent to the server as the request deadline
+            "max_retries": 0 if route.agent == "supervisor" else 1,
+            "timeout": 120,  # also sent to the server as the request deadline
             **vertex,
-        )
+            **overrides,
+        })
 
     raise ValueError(f"Unknown provider {route.provider!r}")
 
@@ -111,6 +113,27 @@ def chat_model(route: Route, settings: Settings) -> BaseChatModel:
 def call_options(route: Route) -> dict:
     """Extra per-call arguments: Nemotron's reasoning mode is off for latency."""
     return {"thinking_mode": False} if route.provider == "nvidia" else {}
+
+
+TOOL_ROUND_MAX_TOKENS = 600
+
+
+def tool_round_options(route: Route) -> dict:
+    """A tool round replies with tool calls or the word DONE, so its output is capped: a deployed
+    Research round once took 12.9 s where ~1 s is normal. Only Nemotron is capped; Gemini's
+    output budget also covers its reasoning tokens, so a tight cap could leave it with no reply."""
+    if route.provider == "nvidia":
+        return {**call_options(route), "max_tokens": TOOL_ROUND_MAX_TOKENS}
+    return call_options(route)
+
+
+def usage(message) -> dict:
+    """Output length, plus token counts when the provider reports them (for cost per query)."""
+    out = {"output_chars": len(getattr(message, "text", "") or "")}
+    if meta := getattr(message, "usage_metadata", None):
+        out["input_tokens"] = meta.get("input_tokens")
+        out["output_tokens"] = meta.get("output_tokens")
+    return out
 
 
 STATUS_LABELS = {

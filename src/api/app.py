@@ -2,6 +2,7 @@
 
 import asyncio
 import logging
+import time
 from collections import defaultdict
 from contextlib import asynccontextmanager
 from dataclasses import asdict
@@ -45,6 +46,8 @@ def create_app(runtime_factory=build_runtime) -> FastAPI:
         # restarts, so the deployment must say so or use a durable checkpointer.
         app.state.graph = build_graph(runtime, InMemorySaver())
         app.state.session_locks = defaultdict(asyncio.Lock)
+        app.state.started = time.monotonic()
+        app.state.turns = 0
         yield
 
     app = FastAPI(title="Health knowledge agents", lifespan=lifespan)
@@ -62,11 +65,13 @@ def create_app(runtime_factory=build_runtime) -> FastAPI:
     @app.post("/api/chat")
     async def chat(body: ChatRequest, request: Request) -> StreamingResponse:
         state = request.app.state
+        state.turns += 1
+        instance = {"turn": state.turns, "uptime_s": round(time.monotonic() - state.started, 1)}
 
         async def frames():
             # One turn at a time per session, so two tabs can't interleave a conversation.
             async with state.session_locks[body.session_id]:
-                async for frame in stream_turn(state.graph, body.query.strip(), body.session_id):
+                async for frame in stream_turn(state.graph, body.query.strip(), body.session_id, instance):
                     yield frame
 
         return StreamingResponse(frames(), media_type="text/event-stream",

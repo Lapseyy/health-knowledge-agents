@@ -9,9 +9,11 @@ to a plain HTML/CSS/JS page that shows, for every answer, which agent and model 
 and why, a latency timeline of every model call and tool call, and the sources behind each
 citation.
 
-Built for CSCI 599 (Agentic AI) at USC, Fall 2026.
+**Live:** https://health-knowledge-agents-1082060235449.us-west1.run.app. It scales to zero when
+idle, so the first request after a quiet period waits while an instance starts.
 
-**Live:** https://health-knowledge-agents-1082060235449.us-west1.run.app. It scales to zero when idle, so the first request after a quiet period waits while an instance starts.
+Built for CSCI 599 (Agentic AI) at USC, Fall 2026. Design: [docs/architecture.md](docs/architecture.md).
+Measurements: [docs/evaluation.md](docs/evaluation.md).
 
 ## How it works
 
@@ -52,7 +54,7 @@ python -m pytest -q
 python main.py                    # open http://localhost:8080
 ```
 
-`python scripts/ask.py "What does the left ventricle do?"` asks from the command line and prints
+`python -m scripts.ask "What does the left ventricle do?"` asks from the command line and prints
 the trace as it happens.
 
 ## Deploy to Cloud Run
@@ -140,6 +142,36 @@ keep an instance warm (billed while idle):
 - The build itself fails with a permission error naming a service account: grant that account
   the Cloud Build Service Account role (`roles/cloudbuild.builds.builder`), then re-run.
 
+## Evaluation
+
+Results are in [docs/evaluation.md](docs/evaluation.md). On 30 textbook questions, RAGAS scored
+faithfulness 0.80, answer relevancy 0.89, context precision 0.73, and context recall 0.88. On the
+deployed service, a warm textbook question reaches first words in a median of 7 s, and a cold
+start adds about 20 s. A query costs well under a cent at list prices.
+
+The evaluation scripts run the full system against fixed question sets in `data/` (built by
+`scripts/build_eval_sets.py`) and write results to `docs/eval/`. Each step resumes where it
+stopped; add `--limit 3` for a quick check first.
+
+```bash
+pip install -r requirements-eval.txt                     # RAGAS 0.4.3 (not needed to run the app)
+
+python -m scripts.evaluate generate                      # answer the 30 RAGAS questions
+python -m scripts.evaluate generate --config research-gemini   # same, Research on Gemini
+python -m scripts.evaluate score default                 # RAGAS: faithfulness, answer relevancy,
+python -m scripts.evaluate score research-gemini         #   context precision, context recall
+python -m scripts.evaluate router                        # Gemini vs Nemotron Lightning as router
+python -m scripts.measure_latency --url <service URL>            # deployed service, warm
+python -m scripts.measure_latency --url <service URL> --cold 3   # cold starts, 20 min apart
+python -m scripts.evaluate report                        # markdown tables for docs/evaluation.md
+```
+
+On Windows, `.\scripts\run_evaluation.ps1` runs all of these in order (add `-Cold 3` for cold starts),
+logs to `docs/eval/run.log`, and writes `docs/eval/report.md`.
+
+The RAGAS judge is Gemini 3.8 Flash on Vertex AI, so scoring uses Google Cloud credentials and
+bills a small amount of Gemini usage.
+
 ## Configuration
 
 Copy `.env.example` to `.env` for local runs; on Cloud Run, the deploy script sets these.
@@ -161,9 +193,11 @@ src/agents/          LangGraph graph, agents, tools, prompts, Tavily MCP client
 src/rag/             chunking, local embeddings, Chroma ingest and retrieval
 src/api/             SSE streaming endpoint and app setup
 src/llm.py           routing table, fallbacks, model clients
+src/evaluation.py    trace breakdown and SSE parsing shared by the evaluation scripts
 static/              the web UI (no build step)
-data/                textbook sections, evaluation questions, synthetic patient database
-scripts/             deploy, CLI, data extraction, and checks
+data/                textbook sections, evaluation question sets, synthetic patient database
+docs/                architecture, evaluation report, and raw evaluation results (docs/eval/)
+scripts/             deploy, CLI, evaluation, data extraction, and checks
 tests/               pytest suite (scripted models, no network)
 ```
 

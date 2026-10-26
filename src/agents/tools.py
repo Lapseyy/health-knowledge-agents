@@ -33,7 +33,7 @@ from src.agents import prompts
 from src.agents.events import emit, timer
 from src.agents.sources import SourceRegistry
 from src.agents.web import accepted_args, content_text, parse_results, redact
-from src.llm import call_options
+from src.llm import call_options, usage
 from src.rag.retriever import retrieve
 
 if TYPE_CHECKING:
@@ -139,7 +139,8 @@ def summary_tools(runtime: "Runtime", registry: SourceRegistry, model=None) -> l
                         HumanMessage(f"{section['citation']}\n\n{section['text'][:DIGEST_MAX_CHARS]}"),
                     ]), DIGEST_TIMEOUT_S)
             emit({"type": "llm_call", "agent": "summary", "provider": route.provider, "model": route.model,
-                  "stage": "digest", "section": f"§{chapter}.{section['section']}", "ms": elapsed["ms"]})
+                  "stage": "digest", "section": f"§{chapter}.{section['section']}", "ms": elapsed["ms"],
+                  **usage(reply)})
             return reply.text.strip()
 
         # Map: one call per section, in parallel. Reduce: the agent's answer call combines the digests.

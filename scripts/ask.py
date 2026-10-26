@@ -37,7 +37,10 @@ def describe(event: dict) -> str:
     if kind == "llm_call":
         calls = f", {event['tool_calls']} tool calls" if event["stage"] == "tools" else ""
         section = f" {event['section']}" if event.get("section") else ""
-        return f"llm_call     {event['agent']} on {event['provider']}: {event['stage']}{section}{calls} ({event['ms']} ms)"
+        tokens = (f", {event['input_tokens']} in / {event['output_tokens']} out tokens"
+                  if event.get("input_tokens") is not None else "")
+        return (f"llm_call     {event['agent']} on {event['provider']}: {event['stage']}{section}{calls} "
+                f"({event['ms']} ms{tokens})")
     if kind == "rag_retrieval":
         return f"rag          {event['agent']}: \"{event['query'][:60]}\" -> {len(event['results'])} results ({event['ms']} ms)"
     if kind == "mcp_tool_call":

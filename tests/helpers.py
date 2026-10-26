@@ -44,11 +44,14 @@ class ScriptedModel(BaseChatModel):
     def bind_tools(self, tools, **kwargs):
         return self.bind(**kwargs)
 
-    def with_structured_output(self, schema, **kwargs):
+    def with_structured_output(self, schema, include_raw: bool = False, **kwargs):
         def plan(messages):
             self.seen.append(messages)
             if isinstance(self.plan, Exception):
                 raise self.plan
+            if include_raw:  # the shape LangChain returns: raw reply, parsed object, parsing error
+                raw = AIMessage("{}", usage_metadata={"input_tokens": 900, "output_tokens": 60, "total_tokens": 960})
+                return {"raw": raw, "parsed": self.plan, "parsing_error": None}
             return self.plan
 
         async def delayed_plan(messages):

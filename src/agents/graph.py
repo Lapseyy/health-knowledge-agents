@@ -18,6 +18,7 @@ error and the plan continues; finish falls back to the best answer available.
 
 import asyncio
 import json
+import logging
 import re
 import time
 from typing import Annotated, TypedDict
@@ -29,8 +30,9 @@ from src.agents import prompts
 from src.agents.events import emit
 from src.agents.plan import RoutePlan
 from src.agents.runtime import Runtime
+from src.agents.web import redact
 from src.agents.workers import WORKERS, recent_history, run_worker
-from src.llm import PROVIDER_NAMES, call_options, describe_failure
+from src.llm import PROVIDER_NAMES, call_options, describe_failure, usage
 
 MAX_PLAN = 3
 HEDGE_AFTER_S = 4.0  # Gemini usually plans in 1.5-3 s; past 4 s, start the backup router alongside it
@@ -38,6 +40,7 @@ SUPERVISOR_TIMEOUT_S = 12.0  # hard limit on the primary router, which keeps run
 FALLBACK_TIMEOUT_S = 10.0  # hard limit on the backup router
 WORKER_TIMEOUT_S = 90.0  # per provider attempt, so a hung call fails over instead of stalling
 JSON_OBJECT = re.compile(r"\{.*\}", re.DOTALL)
+log = logging.getLogger(__name__)
 PLAN_HISTORY_CHARS = 300  # per earlier message: enough to resolve "it" or "the left one"
 FALLBACK_ANSWER = ("Sorry, I couldn't complete that request because a service I depend on failed. "
                    "Please try again in a moment.")
@@ -91,24 +94,31 @@ def snippet(source: dict, length: int = 300) -> str:
     return re.sub(r"(^|\n)#{2,6} ", r"\1", text).strip()[:length]
 
 
+async def request_plan(route, llm, messages: list, trigger: str | None = None) -> tuple[RoutePlan, dict]:
+    """One routing call on one provider: the plan and the call's usage (output size, tokens when
+    reported). Used by the supervisor, and by scripts/evaluate.py to compare the two routers."""
+    emit({**route.as_event(), **({"trigger": trigger} if trigger else {})})
+    config = {"tags": ["supervisor"], "run_name": "supervisor_plan"}
+    if route.provider == "google":
+        # include_raw keeps the raw reply, so its token usage survives structured parsing.
+        result = await llm.with_structured_output(RoutePlan, include_raw=True).ainvoke(messages, config=config)
+        if result.get("parsed") is None:
+            raise ValueError(f"Router reply could not be parsed: {result.get('parsing_error')}")
+        return normalize_plan(result["parsed"]), usage(result.get("raw"))
+    # Nemotron replies with plain JSON: its structured-output mode can't turn reasoning off.
+    system = SystemMessage(f"{prompts.SUPERVISOR}\n\n{prompts.PLAN_AS_JSON}")
+    reply = await llm.bind(**call_options(route)).ainvoke([system, *messages[1:]], config=config)
+    if not (match := JSON_OBJECT.search(reply.text)):
+        raise ValueError(f"Router reply had no JSON object: {reply.text[:120]!r}")
+    return normalize_plan(json.loads(match.group(0))), usage(reply)
+
+
 def build_graph(runtime: Runtime, checkpointer=None):
     async def prepare(state: AgentState) -> dict:
         return {
             "question": state["messages"][-1].text, "standalone": "", "plan": None, "route_reason": "",
             "reply": None, "next": "", "completed": [], "sources": [], "answer": "", "citations": [],
         }
-
-    async def ask_planner(route, llm, messages: list, trigger: str | None = None) -> RoutePlan:
-        emit({**route.as_event(), **({"trigger": trigger} if trigger else {})})
-        config = {"tags": ["supervisor"], "run_name": "supervisor_plan"}
-        if route.provider == "google":
-            return normalize_plan(await llm.with_structured_output(RoutePlan).ainvoke(messages, config=config))
-        # Nemotron replies with plain JSON: its structured-output mode can't turn reasoning off.
-        system = SystemMessage(f"{prompts.SUPERVISOR}\n\n{prompts.PLAN_AS_JSON}")
-        reply = await llm.bind(**call_options(route)).ainvoke([system, *messages[1:]], config=config)
-        if not (match := JSON_OBJECT.search(reply.text)):
-            raise ValueError(f"Router reply had no JSON object: {reply.text[:120]!r}")
-        return normalize_plan(json.loads(match.group(0)))
 
     async def plan_turn(state: AgentState) -> RoutePlan:
         messages = [SystemMessage(prompts.SUPERVISOR), planner_request(state["messages"], state["question"])]
@@ -117,9 +127,10 @@ def build_graph(runtime: Runtime, checkpointer=None):
         running: dict[asyncio.Task, tuple] = {}  # task -> (route, start time)
 
         async def attempt(route, llm, timeout: float, trigger: str | None):
-            """Returns (plan, message, detail) rather than raising, so one router failing never stops the other."""
+            """Returns ((plan, usage), message, detail) rather than raising, so one router failing never
+            stops the other."""
             try:
-                return await asyncio.wait_for(ask_planner(route, llm, messages, trigger), timeout), None, None
+                return await asyncio.wait_for(request_plan(route, llm, messages, trigger), timeout), None, None
             except Exception as error:  # rate limit, timeout, or malformed output
                 return None, describe_failure(error, route.provider, timeout), str(error)
 
@@ -129,39 +140,44 @@ def build_graph(runtime: Runtime, checkpointer=None):
         def elapsed_ms(started: float) -> int:
             return round((time.perf_counter() - started) * 1000)
 
+        turn_started = time.perf_counter()
         start(primary, primary_llm, SUPERVISOR_TIMEOUT_S)
-        backup_started = False
+        backup_why = None  # why the backup router ran: "slow" (hedged after HEDGE_AFTER_S) or "failed"
         try:
             while running:
                 done, _ = await asyncio.wait(running, return_when=asyncio.FIRST_COMPLETED,
-                                             timeout=None if backup_started else HEDGE_AFTER_S)
+                                             timeout=None if backup_why else HEDGE_AFTER_S)
                 if not done:  # the primary is still working: hedge with the backup instead of waiting
                     start(backup, backup_llm, FALLBACK_TIMEOUT_S,
                           f"{primary_name} had not answered after {HEDGE_AFTER_S:g} s, so both ran "
                           "and the first plan back was used")
-                    backup_started = True
+                    backup_why = "slow"
                     continue
                 finished = [(running.pop(task), task.result()) for task in done]
                 for (route, started), (plan, message, detail) in finished:
                     if plan is None:
+                        log.warning("Plan on %s failed: %s", route.provider, redact(message))
                         emit({"type": "error", "agent": "supervisor", "provider": route.provider, "stage": "plan",
                               "message": message, "detail": detail[:600], "ms": elapsed_ms(started)})
                 winners = [(route, started, plan) for (route, started), (plan, _, _) in finished if plan is not None]
                 if winners:
-                    route, started, plan = min(winners, key=lambda w: w[0].fallback)  # primary wins a tie
+                    route, started, (plan, plan_usage) = min(winners, key=lambda w: w[0].fallback)  # primary wins a tie
                     for loser, (other, other_started) in running.items():
                         loser.cancel()
                         emit({"type": "llm_cancelled", "agent": "supervisor", "provider": other.provider,
                               "model": other.model, "stage": "plan", "ms": elapsed_ms(other_started),
                               "reason": f"{PROVIDER_NAMES[route.provider]} answered first"})
-                    emit({"type": "agent_plan",
+                    # ms: the winning call alone; wall_ms: the whole planning step, including any wait
+                    # before the backup started.
+                    emit({"type": "agent_plan", "model": route.model,
                           "planner": f"{route.provider} {'fallback' if route.fallback else 'primary'}",
-                          "hedged": backup_started, "plan": plan.agents, "reason": plan.reason,
-                          "standalone": plan.standalone, "ms": elapsed_ms(started)})
+                          "hedged": backup_why == "slow", "backup": backup_why, "plan": plan.agents,
+                          "reason": plan.reason, "standalone": plan.standalone, "ms": elapsed_ms(started),
+                          "wall_ms": elapsed_ms(turn_started), **plan_usage})
                     return plan
-                if not backup_started:  # the primary failed outright: fail over now
+                if not backup_why:  # the primary failed outright: fail over now
                     start(backup, backup_llm, FALLBACK_TIMEOUT_S, f"{primary_name} failed: {finished[0][1][1]}")
-                    backup_started = True
+                    backup_why = "failed"
         finally:
             for task in running:
                 task.cancel()
@@ -190,6 +206,7 @@ def build_graph(runtime: Runtime, checkpointer=None):
                                                   WORKER_TIMEOUT_S)
                 except Exception as error:  # one provider failing must not take down the turn
                     message = describe_failure(error, route.provider, WORKER_TIMEOUT_S)
+                    log.warning("%s agent on %s failed: %s", name, route.provider, redact(message))
                     emit({"type": "error", "agent": name, "provider": route.provider, "stage": "agent",
                           "message": message, "detail": str(error)[:600],
                           "ms": round((time.perf_counter() - started) * 1000)})

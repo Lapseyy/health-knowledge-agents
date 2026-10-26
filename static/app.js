@@ -402,6 +402,16 @@ function detailList(pairs) {
   return dl;
 }
 
+function tokenSummary(e) {
+  if (e.input_tokens == null && e.output_chars == null) return null;
+  const parts = [];
+  if (e.input_tokens != null) parts.push(`${e.input_tokens.toLocaleString()} in`);
+  if (e.output_tokens != null) parts.push(`${e.output_tokens.toLocaleString()} out`);
+  const tokens = parts.length ? `${parts.join(", ")} tokens` : null;
+  const chars = e.output_chars != null ? `${e.output_chars.toLocaleString()} characters written` : null;
+  return [tokens, chars].filter(Boolean).join("; ");
+}
+
 function timelineRows(turn) {
   const rows = [];
   for (const e of turn.events) {
@@ -413,21 +423,23 @@ function timelineRows(turn) {
         detail: [["Agents", e.plan.map((a) => AGENT_NAMES[a] || a).join(", ") || "none (direct reply)"],
                  ["Reason", e.reason], ["Read as", e.standalone],
                  ["Router", e.hedged ? `${PROVIDER_NAMES[provider]}, first of two routers to answer` : PROVIDER_NAMES[provider]],
-                 ["Took", `${e.ms} ms`]] });
+                 ["Usage", tokenSummary(e)], ["Took", `${e.ms} ms`]] });
     } else if (e.type === "llm_cancelled") {
       rows.push({ label: `${SHORT_PROVIDER[e.provider]} call cancelled`, start, end, provider: e.provider, cancelled: true,
         detail: [["Outcome", `Cancelled: ${e.reason}`], ["Model", e.model, true], ["Ran for", `${e.ms} ms`]] });
     } else if (e.type === "llm_call" && e.stage === "digest") {
       rows.push({ label: `${AGENT_NAMES[e.agent]}: ${e.section}`, start, end, provider: e.provider,
         detail: [["Step", `Reading ${e.section} in full and condensing it for the chapter summary`],
-                 ["Provider", PROVIDER_NAMES[e.provider]], ["Model", e.model, true], ["Took", `${e.ms} ms`]] });
+                 ["Provider", PROVIDER_NAMES[e.provider]], ["Model", e.model, true], ["Usage", tokenSummary(e)],
+                 ["Took", `${e.ms} ms`]] });
     } else if (e.type === "llm_call") {
       const doing = { tools: "tools", answer: "answer", intermediate: "draft" }[e.stage] || e.stage;
       rows.push({ label: `${AGENT_NAMES[e.agent] || e.agent}: ${doing}`, start, end, provider: e.provider,
         detail: [["Step", { tools: "Choosing which tools to call", answer: "Writing the answer",
                             intermediate: "Drafting findings for the next agent" }[e.stage] || e.stage],
                  ["Provider", PROVIDER_NAMES[e.provider]], ["Model", e.model, true],
-                 ["Tool calls requested", e.stage === "tools" ? String(e.tool_calls) : null], ["Took", `${e.ms} ms`]] });
+                 ["Tool calls requested", e.stage === "tools" ? String(e.tool_calls) : null], ["Usage", tokenSummary(e)],
+                 ["Took", `${e.ms} ms`]] });
     } else if (e.type === "llm_route" && e.agent !== "supervisor") {
       rows.push({ label: `${AGENT_NAMES[e.agent]} starts`, start, end, provider: e.provider, tick: true,
         detail: [["Provider", PROVIDER_NAMES[e.provider]], ["Model", e.model, true],
