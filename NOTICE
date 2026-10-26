@@ -4,3 +4,8 @@ Source: https://github.com/openstax/osbooks-anatomy-physiology
 
 The files in data/ (ap2e_sections.jsonl, ap2e_eval_candidates.jsonl) are derived
 from this work by scripts/extract_openstax.py and are shared under the same license.
+
+Synthetic patient data: data/patients.db was generated with Synthea
+(https://github.com/synthetichealth/synthea, Apache License 2.0), seed 599,
+1,126 fictional patients in Los Angeles, California, and reduced by
+scripts/build_patient_db.py. No real patient data is included.
