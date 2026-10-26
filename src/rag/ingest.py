@@ -1,7 +1,7 @@
 """Build the Chroma index: load sections, chunk, embed, store.
 
-Resumable: chunk IDs are deterministic, so a rerun after a rate-limit failure
-skips chunks already stored. Use --rebuild after changing the chunking or the
+Resumable: chunk IDs are deterministic, so a rerun after an interruption skips
+chunks already stored. Use --rebuild after changing the chunking or the
 embedding model.
 
     python -m src.rag.ingest            # build or resume
@@ -11,31 +11,16 @@ embedding model.
 import argparse
 import time
 
-from langchain_core.documents import Document
 from langchain_core.embeddings import Embeddings
 
 from src.config import Settings, get_settings
 from src.rag.chunking import build_chunks, load_sections
 from src.rag.store import get_embeddings, open_store, write_manifest
 
-BATCH_SIZE = 50  # one embeddings request per batch
-MAX_RETRIES = 5
+BATCH_SIZE = 128
 
 
-def add_with_retry(store, batch: list[Document]) -> None:
-    for attempt in range(MAX_RETRIES):
-        try:
-            store.add_documents(batch, ids=[doc.id for doc in batch])
-            return
-        except Exception as error:  # the NVIDIA client raises plain exceptions on 429/5xx
-            if attempt == MAX_RETRIES - 1:
-                raise
-            wait = 2 ** attempt * 5
-            print(f"  embedding request failed ({error.__class__.__name__}: {error}); retrying in {wait}s")
-            time.sleep(wait)
-
-
-def ingest(settings: Settings, embeddings: Embeddings, rebuild: bool = False, pause: float = 1.6) -> int:
+def ingest(settings: Settings, embeddings: Embeddings, rebuild: bool = False) -> int:
     chunks = build_chunks(load_sections(settings.corpus_path), settings.chunk_size, settings.chunk_overlap)
     settings.chroma_dir.mkdir(parents=True, exist_ok=True)
     store = open_store(settings, embeddings)
@@ -48,11 +33,9 @@ def ingest(settings: Settings, embeddings: Embeddings, rebuild: bool = False, pa
     print(f"{len(chunks)} chunks, {len(existing)} already stored, {len(pending)} to embed")
 
     for start in range(0, len(pending), BATCH_SIZE):
-        add_with_retry(store, pending[start:start + BATCH_SIZE])
-        done = min(start + BATCH_SIZE, len(pending))
-        print(f"  {done}/{len(pending)}")
-        if done < len(pending):
-            time.sleep(pause)  # stays under the free tier's ~40 requests/minute
+        batch = pending[start:start + BATCH_SIZE]
+        store.add_documents(batch, ids=[doc.id for doc in batch])
+        print(f"  {start + len(batch)}/{len(pending)}")
 
     write_manifest(settings, len(chunks))
     return len(chunks)

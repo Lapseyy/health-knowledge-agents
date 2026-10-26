@@ -5,17 +5,15 @@ from pathlib import Path
 
 from langchain_chroma import Chroma
 from langchain_core.embeddings import Embeddings
-from langchain_nvidia_ai_endpoints import NVIDIAEmbeddings
 
 from src.config import Settings
+from src.rag.embeddings import LocalEmbeddings
 
 MANIFEST = "manifest.json"
 
 
 def get_embeddings(settings: Settings) -> Embeddings:
-    # NVIDIAEmbeddings reads NVIDIA_API_KEY from the environment and sends
-    # input_type="query" for queries and "passage" for documents automatically.
-    return NVIDIAEmbeddings(model=settings.embedding_model, truncate="END")
+    return LocalEmbeddings(settings.embedding_model, cache_dir=str(settings.embedding_cache_dir))
 
 
 def open_store(settings: Settings, embeddings: Embeddings) -> Chroma:

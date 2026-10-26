@@ -17,6 +17,7 @@ class Settings:
     chroma_dir: Path
     chroma_collection: str
     embedding_model: str
+    embedding_cache_dir: Path
     retrieval_k: int
     chunk_size: int
     chunk_overlap: int
@@ -35,7 +36,8 @@ def get_settings() -> Settings:
         eval_path=_path("EVAL_PATH", "data/ap2e_eval_candidates.jsonl"),
         chroma_dir=_path("CHROMA_PERSIST_DIR", "chroma_index"),
         chroma_collection=os.getenv("CHROMA_COLLECTION", "ap2e"),
-        embedding_model=os.getenv("NVIDIA_EMBEDDING_MODEL", "nvidia/llama-3.2-nv-embedqa-1b-v2"),
+        embedding_model=os.getenv("EMBEDDING_MODEL", "BAAI/bge-small-en-v1.5"),
+        embedding_cache_dir=_path("EMBEDDING_CACHE_DIR", "models"),
         retrieval_k=int(os.getenv("RETRIEVAL_K", "5")),
         chunk_size=int(os.getenv("CHUNK_SIZE", "1500")),
         chunk_overlap=int(os.getenv("CHUNK_OVERLAP", "200")),

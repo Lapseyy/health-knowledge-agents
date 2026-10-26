@@ -5,8 +5,9 @@ venv/
 __pycache__/
 .pytest_cache/
 
-# generated vector index (rebuild with: python -m src.rag.ingest)
+# generated vector index and downloaded embedding model
 chroma_index/
+models/
 
 # course materials (kept locally, not published)
 docs/docs/

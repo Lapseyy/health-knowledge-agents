@@ -1,11 +1,13 @@
 import json
 from dataclasses import replace
 
+import numpy as np
 import pytest
 from langchain_core.embeddings import DeterministicFakeEmbedding
 
 from src.config import get_settings
 from src.rag.chunking import build_chunks, heading_path, load_sections
+from src.rag.embeddings import LocalEmbeddings
 from src.rag.ingest import ingest
 from src.rag.retriever import load_store, retrieve
 
@@ -63,7 +65,7 @@ def tiny_index(tmp_path, sections):
     corpus.write_text("\n".join(json.dumps(s) for s in sections[:3]), encoding="utf-8")
     settings = replace(SETTINGS, corpus_path=corpus, chroma_dir=tmp_path / "chroma")
     embeddings = DeterministicFakeEmbedding(size=64)
-    count = ingest(settings, embeddings, pause=0)
+    count = ingest(settings, embeddings)
     return settings, embeddings, count
 
 
@@ -81,7 +83,7 @@ def test_ingest_then_retrieve_round_trip(tiny_index):
 
 def test_ingest_resumes_without_duplicates(tiny_index, capsys):
     settings, embeddings, count = tiny_index
-    ingest(settings, embeddings, pause=0)
+    ingest(settings, embeddings)
     assert "0 to embed" in capsys.readouterr().out
     assert len(load_store(settings, embeddings).get(include=[])["ids"]) == count
 
@@ -90,3 +92,26 @@ def test_model_mismatch_fails_loudly(tiny_index):
     settings, embeddings, _ = tiny_index
     with pytest.raises(RuntimeError, match="Rebuild"):
         load_store(replace(settings, embedding_model="some/other-model"), embeddings)
+
+
+
+class FakeTextEmbedding:
+    """Stands in for fastembed.TextEmbedding so tests never download a model."""
+
+    def __init__(self, model_name, cache_dir=None):
+        self.seen = []
+
+    def embed(self, texts, batch_size=32):
+        for text in texts:
+            self.seen.append(text)
+            yield np.array([float(len(text)), 1.0])
+
+
+def test_local_embeddings_prefix_queries_not_passages(monkeypatch):
+    monkeypatch.setattr("fastembed.TextEmbedding", FakeTextEmbedding)
+    embeddings = LocalEmbeddings("BAAI/bge-small-en-v1.5")
+    assert embeddings.embed_documents(["heart", "lungs"]) == [[5.0, 1.0], [5.0, 1.0]]
+    query_vector = embeddings.embed_query("heart")
+    assert isinstance(query_vector[0], float)
+    assert embeddings.model.seen[:2] == ["heart", "lungs"]
+    assert embeddings.model.seen[2].startswith("Represent this sentence") and embeddings.model.seen[2].endswith("heart")
