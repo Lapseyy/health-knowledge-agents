@@ -42,6 +42,7 @@ if TYPE_CHECKING:
 MAX_WEB_SEARCHES = 2  # per agent per turn: each costs ~2.5 s and adds sources to the answer prompt
 MAX_TEXTBOOK_SEARCHES = 1  # Research's searches beyond the passages prefetched for the question
 WEB_RESULTS = 3
+MAX_WEB_PAGES = 2  # full-page reads per turn: each adds a whole article to the answer prompt
 MAX_SQL_ROWS = 50
 SQL_TIMEOUT_S = 5
 MAX_SECTION_CHARS = 30000
@@ -206,9 +207,14 @@ def web_tools(runtime: "Runtime", registry: SourceRegistry, agent: str, extract:
         tools.append(search_web)
 
     if extract and mcp_extract:
+        pages = {"count": 0}
+
         @tool
         async def extract_webpage(url: str) -> str:
             """Read the full text of a web page by URL."""
+            if pages["count"] >= MAX_WEB_PAGES:
+                return f"Page limit ({MAX_WEB_PAGES} per turn) reached. Answer with the pages you have read."
+            pages["count"] += 1
             return number(await call_mcp(mcp_extract, {"urls": [url], "url": url}))
 
         tools.append(extract_webpage)

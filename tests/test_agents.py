@@ -255,6 +255,20 @@ def test_web_searches_are_capped_per_agent(index):
     assert sum("limit" in reply for reply in tool_replies) == 1
 
 
+def test_web_page_reads_are_capped_per_turn(index):
+    calls = [{"name": "extract_webpage", "args": {"url": f"https://example.org/{i}"}, "id": f"c{i}"}
+             for i in range(3)]
+    summary = ScriptedModel(replies=[AIMessage("", tool_calls=calls), AIMessage("DONE"), AIMessage("Summary [1].")])
+    runtime = make_runtime(index, web=fake_web(TAVILY_TEXT), summary=summary,
+                           supervisor=ScriptedModel(plan=RoutePlan(agents=["summary"], reason="An article.")))
+    _, events, _ = run_turn(runtime, "Summarize these three articles.")
+
+    pages = [e for e in events if e["type"] == "mcp_tool_call" and "extract" in e["tool"]]
+    assert len(pages) == 2
+    tool_replies = [m.content for m in summary.seen[1] if m.type == "tool"]
+    assert sum("Page limit" in reply for reply in tool_replies) == 1
+
+
 def test_tool_budget_caps_calls_per_agent(index):
     def round_of(n, start):  # run_sql has no per-tool cap, so only the overall budget applies
         return AIMessage("", tool_calls=[{"name": "run_sql", "args": {"query": f"SELECT {i}"}, "id": f"c{i}"}

@@ -71,9 +71,17 @@ def fake_web(search_result: str | Exception, delay: float = 0) -> TavilyMCP:
             raise search_result
         return search_result
 
+    async def extract(urls: list[str], url: str = "") -> str:
+        await asyncio.sleep(delay)
+        return search_result if isinstance(search_result, str) else ""
+
     web = TavilyMCP(None)
-    web.tools = {"tavily_search": StructuredTool.from_function(
-        coroutine=search, name="tavily_search", description="Tavily web search")}
+    web.tools = {
+        "tavily_search": StructuredTool.from_function(
+            coroutine=search, name="tavily_search", description="Tavily web search"),
+        "tavily_extract": StructuredTool.from_function(
+            coroutine=extract, name="tavily_extract", description="Tavily page extraction"),
+    }
     return web
 
 

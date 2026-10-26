@@ -112,7 +112,7 @@ Each agent has its own tools and its own prompts, and runs in two phases:
 | `read_section` | Returns a whole textbook section by ID | 30,000 characters; each section once per turn |
 | `summarize_chapter` | Reads every section of a chapter in full and condenses each in parallel (map), for the answer call to combine (reduce) | 6 sections at a time, 45 s per section; a failed section is reported, not fatal |
 | `search_web` | Tavily search through the Remote MCP server | 2 per agent per turn, 3 results each, 1,500 characters per result |
-| `extract_webpage` | Tavily page extraction through the Remote MCP server | |
+| `extract_webpage` | Tavily page extraction through the Remote MCP server | 2 pages per turn |
 | `run_sql` | One `SELECT` (or `WITH … SELECT`) on a read-only SQLite connection (`mode=ro`) | Single statement, 5 s timeout, 50 rows |
 
 The patient database comes from Synthea (seed 599, 1,126 fictional patients in Los Angeles,

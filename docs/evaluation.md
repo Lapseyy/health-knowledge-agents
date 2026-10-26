@@ -338,7 +338,10 @@ per query: Cloud Build bills each build by the minute, and Artifact Registry sto
 ### Router: Gemini 3.8 Flash or Nemotron 3.5 Lightning
 
 Each of the 26 routing messages went to both routers, with the production prompt and input
-format.
+format. This comparison ran before one sentence was added to the supervisor prompt, sending
+"find an article about X and summarize it" to Summary alone. Before that, Gemini planned Research
+and then Summary for such a request, and both searched the web. None of the 26 messages is that
+kind of request.
 
 | | Gemini 3.8 Flash | Nemotron 3.5 Lightning |
 |---|---|---|

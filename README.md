@@ -36,6 +36,36 @@ Measurements: [docs/evaluation.md](docs/evaluation.md).
 - **Chapter summaries.** `summarize_chapter` reads every section of a chapter in full, condenses
   each one in parallel, then writes the summary from those digests, citing each section.
 
+## Try it
+
+Each of these questions exercises a different path. The panel beside the answer shows the
+agents, models, tool calls, and sources for each one.
+
+| Ask | What runs |
+|---|---|
+| What does the left ventricle do? | Research: textbook retrieval, with numbered citations |
+| What are the latest guidelines for treating high blood pressure? | Research: web search through Tavily MCP |
+| How many patients have diabetes, and what is their average BMI? | Data: read-only SQL over the synthetic patients |
+| What is hypertension, and how many patients in the database have it? | Research, then Data, in one turn |
+| Summarize chapter 19. | Summary: every section read and condensed, then combined |
+| Find a recent news article about GLP-1 drugs and summarize it. | Summary: the same `search_web` MCP tool Research uses, then page extraction |
+
+## Providers, access, and cost
+
+Prices were checked on October 26, 2026. Details and per-query measurements are in
+[docs/evaluation.md](docs/evaluation.md#4-cost-per-query).
+
+| Service | Used for | Access | Cost |
+|---|---|---|---|
+| Gemini 3.8 Flash on Vertex AI (Google) | Supervisor, backup for the agents, RAGAS judge | A Google Cloud project with billing. Locally, `gcloud auth application-default login`; on Cloud Run, a service account with the Vertex AI User role (no API key). | $0.75 per 1M input tokens and $3.75 per 1M output tokens through Dec 31, 2026; $1.50 and $7.50 after. About $0.0007 per turn for routing. |
+| Nemotron 3 Ultra and Nemotron 3.5 Lightning, NVIDIA API catalog | Research, Summary, Data, backup router | An API key from [build.nvidia.com](https://build.nvidia.com) | Free developer tier, limited to about 40 requests a minute |
+| Tavily Remote MCP | Web search and page extraction | An API key from [tavily.com](https://tavily.com) | 1,000 free credits a month, then $0.008 per credit (a basic search is 1 credit) |
+| Cloud Run, Cloud Build, Artifact Registry, Secret Manager | Hosting | Enabled by the deploy script | Cloud Run stays within its free tier at coursework traffic. Cloud Build bills each build by the minute; a build takes about 5 minutes. |
+| `BAAI/bge-small-en-v1.5` embeddings | Retrieval | Downloaded once, runs locally | Free |
+
+At list prices, a textbook question costs about $0.0003 and a question that searches the web
+about $0.013, mostly for the search.
+
 ## Run locally
 
 Requirements: Python 3.12, the [gcloud CLI](https://cloud.google.com/sdk/docs/install) (Gemini
