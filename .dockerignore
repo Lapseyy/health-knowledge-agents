@@ -1,0 +1,11 @@
+# Keep secrets and local build outputs out of the Docker build context.
+.env
+.git
+venv/
+.venv/
+__pycache__/
+.pytest_cache/
+chroma_index/
+models/
+docs/
+tests/

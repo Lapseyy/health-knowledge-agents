@@ -37,7 +37,7 @@ class WorkerSpec:
     name: str
     tool_prompt: str
     answer_prompt: str
-    make_tools: Callable[["Runtime", SourceRegistry], list[BaseTool]]
+    make_tools: Callable[["Runtime", SourceRegistry, tuple], list[BaseTool]]  # (runtime, registry, (route, llm))
     prefetch_textbook: bool = False
 
 
@@ -88,7 +88,7 @@ async def run_worker(spec: WorkerSpec, state: dict, runtime: "Runtime", route: "
         task += f"\n\nFindings from earlier agents in this turn:\n{findings}"
 
     await runtime.web.connect()  # no-op when connected; retries a failed connection at most once a minute
-    tools = spec.make_tools(runtime, registry)
+    tools = spec.make_tools(runtime, registry, (route, llm))
     tools_used: list[str] = []
     with timer() as tool_time:
         loop_input = task
@@ -102,7 +102,10 @@ async def run_worker(spec: WorkerSpec, state: dict, runtime: "Runtime", route: "
         bound = llm.bind_tools(tools, **options).with_config(tags=["tool_loop"], run_name=f"{spec.name}_tools")
         by_name = {tool.name: tool for tool in tools}
         for _ in range(MAX_TOOL_ROUNDS):
-            reply = await bound.ainvoke(messages)
+            with timer() as call_time:
+                reply = await bound.ainvoke(messages)
+            emit({"type": "llm_call", "agent": spec.name, "provider": route.provider, "model": route.model,
+                  "stage": "tools", "tool_calls": len(reply.tool_calls), "ms": call_time["ms"]})
             messages.append(reply)
             if not reply.tool_calls:
                 break
@@ -124,6 +127,8 @@ async def run_worker(spec: WorkerSpec, state: dict, runtime: "Runtime", route: "
             *history,
             HumanMessage(f"{task}\n\nSources:\n{registry.render()}"),
         ])
+    emit({"type": "llm_call", "agent": spec.name, "provider": route.provider, "model": route.model,
+          "stage": tag, "ms": answer_time["ms"]})
     answer = response.text.strip()
 
     result = {

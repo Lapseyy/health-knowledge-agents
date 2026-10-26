@@ -33,6 +33,8 @@ class Settings:
     # Tools
     tavily_api_key: str | None
     patient_db_path: Path
+    # Startup
+    warm_up: bool
 
 
 def _path(name: str, default: str) -> Path:
@@ -66,4 +68,5 @@ def get_settings() -> Settings:
         google_cloud_location=os.getenv("GOOGLE_CLOUD_LOCATION", "global"),
         tavily_api_key=os.getenv("TAVILY_API_KEY"),
         patient_db_path=_path("PATIENT_DB_PATH", "data/patients.db"),
+        warm_up=_flag("WARM_UP", "true"),
     )

@@ -1,8 +1,8 @@
 """Trace events streamed to the UI while the graph runs.
 
-Event types: agent_route, llm_route, rag_retrieval, mcp_tool_call, sql_query,
-error. Each is a plain dict with a "type" key; the API layer forwards them as
-SSE `trace` frames.
+Event types: llm_route, agent_plan, agent_route, llm_call, llm_cancelled,
+rag_retrieval, mcp_tool_call, sql_query, answer_reset, error. Each is a plain dict with a
+"type" key; the API layer forwards them as SSE `trace` frames.
 """
 
 import time

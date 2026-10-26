@@ -25,11 +25,19 @@ def describe(event: dict) -> str:
     kind = event["type"]
     if kind == "llm_route":
         role = "FALLBACK " if event["fallback"] else ""
-        return f"llm_route    {event['agent']} -> {role}{event['provider']} {event['model']} [{event['dimension']}]"
+        why = f" because {event['trigger']}" if event.get("trigger") else ""
+        return f"llm_route    {event['agent']} -> {role}{event['provider']} {event['model']} [{event['dimension']}]{why}"
     if kind == "agent_plan":
-        return f"agent_plan   {event['plan']} by {event['planner']} ({event['ms']} ms): {event['reason']}"
+        hedged = ", hedged" if event.get("hedged") else ""
+        return f"agent_plan   {event['plan']} by {event['planner']} ({event['ms']} ms{hedged}): {event['reason']}"
+    if kind == "llm_cancelled":
+        return f"cancelled    {event['agent']} on {event['provider']} after {event['ms']} ms: {event['reason']}"
     if kind == "agent_route":
         return f"agent_route  supervisor -> {event['to']} (step {event['step']} of {event['of']})"
+    if kind == "llm_call":
+        calls = f", {event['tool_calls']} tool calls" if event["stage"] == "tools" else ""
+        section = f" {event['section']}" if event.get("section") else ""
+        return f"llm_call     {event['agent']} on {event['provider']}: {event['stage']}{section}{calls} ({event['ms']} ms)"
     if kind == "rag_retrieval":
         return f"rag          {event['agent']}: \"{event['query'][:60]}\" -> {len(event['results'])} results ({event['ms']} ms)"
     if kind == "mcp_tool_call":
@@ -40,7 +48,8 @@ def describe(event: dict) -> str:
         return f"answer_reset {event['agent']}: {event['reason']}"
     if kind == "error":
         provider = f" ({event['provider']})" if event.get("provider") else ""
-        return f"ERROR        {event['agent']}{provider} [{event['stage']}]: {event['message']}"
+        took = f" after {event['ms']} ms" if event.get("ms") is not None else ""
+        return f"ERROR        {event['agent']}{provider} [{event['stage']}]{took}: {event['message']}"
     return str(event)
 
 

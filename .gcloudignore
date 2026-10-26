@@ -1,0 +1,12 @@
+# Files `gcloud builds submit` does not upload. Everything in .gitignore is excluded too:
+# .env and other secrets, virtual environments, and the local chroma_index/ and models/
+# (the image builds its own).
+.gcloudignore
+.git
+.gitignore
+#!include:.gitignore
+
+tests/
+docs/
+scripts/
+.env.example

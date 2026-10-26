@@ -16,26 +16,39 @@ from langchain_core.tools import BaseTool
 
 log = logging.getLogger(__name__)
 
+# The assignment specifies the key as a query parameter on the Remote MCP URL, so any
+# error message or log line that includes the URL would include the key: redact first.
 TAVILY_MCP_URL = "https://mcp.tavily.com/mcp/?tavilyApiKey={key}"
+KEY_IN_URL = re.compile(r"(tavilyApiKey=)[^&\s'\"]+")
 RETRY_AFTER_S = 60
 CONNECT_TIMEOUT_S = 15
 MAX_RESULT_CHARS = 1500
 
 
 class TavilyMCP:
+    clock = staticmethod(time.monotonic)  # replaceable in tests
+
     def __init__(self, api_key: str | None):
         self.api_key = api_key
         self.tools: dict[str, BaseTool] = {}
-        self.last_attempt = 0.0
+        # None until the first attempt. Not 0.0: self.clock() counts from boot, and a fresh
+        # Cloud Run container is seconds old, so a 0.0 start looked like "tried moments ago"
+        # and every cold start skipped the connection.
+        self.last_attempt: float | None = None
         self.last_error: str | None = None if api_key else "TAVILY_API_KEY is not set"
 
     async def connect(self) -> bool:
         """Discover Tavily's tools (MCP tools/list). Returns True if web tools are available."""
         if self.tools:
             return True
-        if not self.api_key or time.monotonic() - self.last_attempt < RETRY_AFTER_S:
+        if not self.api_key:
+            if self.last_attempt is None:  # say so once, not on every turn
+                self.last_attempt = self.clock()
+                log.warning("Tavily MCP unavailable: %s", self.last_error)
             return False
-        self.last_attempt = time.monotonic()
+        if self.last_attempt is not None and self.clock() - self.last_attempt < RETRY_AFTER_S:
+            return False
+        self.last_attempt = self.clock()
         from langchain_mcp_adapters.client import MultiServerMCPClient
 
         client = MultiServerMCPClient({
@@ -44,7 +57,7 @@ class TavilyMCP:
         try:
             tools = await asyncio.wait_for(client.get_tools(server_name="tavily"), CONNECT_TIMEOUT_S)
         except Exception as error:  # transport failure, bad key, malformed handshake
-            self.last_error = f"{type(error).__name__}: {error}".replace(self.api_key, "***")
+            self.last_error = redact(f"{type(error).__name__}: {error}")
             log.warning("Tavily MCP unavailable: %s", self.last_error)
             return False
         self.tools = {tool.name: tool for tool in tools}
@@ -55,6 +68,11 @@ class TavilyMCP:
     def find(self, suffix: str) -> BaseTool | None:
         """Tool whose name ends with e.g. "search" (tavily_search or tavily-search)."""
         return next((t for name, t in self.tools.items() if name.replace("-", "_").endswith(suffix)), None)
+
+
+def redact(text: str) -> str:
+    """Hide the Tavily API key in any text that may contain the MCP URL."""
+    return KEY_IN_URL.sub(r"\1***", text)
 
 
 def accepted_args(tool: BaseTool, wanted: dict) -> dict:
